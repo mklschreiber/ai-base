@@ -17,7 +17,7 @@
 #   app/package.json (read with the web profiles' read command from a fixture
 #   docs/ai-project.md), covering: missing version file, 0.0.0 placeholder, a
 #   version shared by two merges, an existing remote tag without a release,
-#   an existing tag on a LATER merge of the same version, an unparsable
+#   an existing tag on an EARLIER merge of the same version, an unparsable
 #   version, a local-only v-prefixed tag (non-standard format), a merge reached only via a second
 #   parent (must be ignored) and a new newest version.
 # - `gh` is a stub on PATH: `release view` answers from a state file,
@@ -129,11 +129,11 @@ build_template() {
   merge_pr 1 missing "PR 1 without version file"
   merge_pr 2 0.0.0 "PR 2 scaffold"
   export GIT_COMMITTER_DATE="2026-02-03T12:00:00Z"
-  merge_pr 3 1.0.0 "PR 3 first release"
-  merge_pr 4 1.0.0 "PR 4 same version"
+  merge_pr 3 1.0.0 "PR 3 first 1.0.0"
+  merge_pr 4 1.0.0 "PR 4 last 1.0.0"
   merge_pr 5 1.1.0 "PR 5 tagged without release"
-  merge_pr 6 1.2.0 "PR 6 first 1.2.0"
-  merge_pr 7 1.2.0 "PR 7 tagged 1.2.0 later"
+  merge_pr 6 1.2.0 "PR 6 tagged 1.2.0 earlier"
+  merge_pr 7 1.2.0 "PR 7 last 1.2.0"
   merge_pr 8 1.3 "PR 8 unparsable"
   merge_pr 9 1.3.0 "PR 9 has local v-tag"
   # A merge commit that is only reachable through a second parent: a helper
@@ -156,9 +156,9 @@ build_template() {
   git branch -q -D feature/side
   git remote add origin "$TEMPLATE/origin.git"
   git push -q origin main
-  # Existing remote tags: 1.1.0 (no release), 1.2.0 on the LATER merge (with release).
+  # Existing remote tags: 1.1.0 (no release), 1.2.0 on the EARLIER merge (with release).
   git tag 1.1.0 "$(git log --first-parent --merges --format='%H %s' main | awk '$5=="#5"{print $1}')"
-  git tag 1.2.0 "$(git log --first-parent --merges --format='%H %s' main | awk '$5=="#7"{print $1}')"
+  git tag 1.2.0 "$(git log --first-parent --merges --format='%H %s' main | awk '$5=="#6"{print $1}')"
   git push -q origin refs/tags/1.1.0 refs/tags/1.2.0
   git clone -q "$TEMPLATE/origin.git" "$TEMPLATE/work"
   # Local-only tag in the clone (never pushed).
@@ -266,7 +266,7 @@ skill_plan() {
   local default sha version v line fetch_out tag
   P="$BASE/plan"
   rm -rf "$P"; mkdir -p "$P"
-  : > "$P/warnings"; : > "$P/notes"; : > "$P/first"; : > "$P/new"; : > "$P/release_only"
+  : > "$P/warnings"; : > "$P/notes"; : > "$P/last"; : > "$P/new"; : > "$P/release_only"
   # Step 1
   skill_load_source || return 1
   # Step 2
@@ -312,7 +312,10 @@ skill_plan() {
       echo "${sha:0:7}: placeholder 0.0.0 skipped" >> "$P/notes"
       continue
     fi
-    grep -q "^${version} " "$P/first" || echo "${version} ${sha}" >> "$P/first"
+    # Keep only the last sha per version: drop an earlier entry, then append.
+    grep -v "^${version} " "$P/last" > "$P/last.tmp"
+    mv "$P/last.tmp" "$P/last"
+    echo "${version} ${sha}" >> "$P/last"
   done
   # Step 4 (tagged check) + Step 6 (new tags)
   while read -r v sha; do
@@ -320,7 +323,7 @@ skill_plan() {
       continue
     fi
     echo "${v} ${sha}" >> "$P/new"
-  done < "$P/first"
+  done < "$P/last"
   # Step 6 (release only)
   while read -r line; do
     is_semver "${line}" || continue
@@ -452,10 +455,10 @@ test_skill_documents_the_mirrored_tag_and_release_commands() {
 # Plan (steps 3-6)
 # ---------------------------------------------------------------------------
 
-test_plan_tags_first_merge_of_a_shared_version() {
+test_plan_tags_last_merge_of_a_shared_version() {
   make_fixture
   skill_plan
-  assert_eq "1.0.0 $(sha_of_merge 3)" "$(grep '^1.0.0 ' "$P/new")" "1.0.0 goes to merge #3, not #4"
+  assert_eq "1.0.0 $(sha_of_merge 4)" "$(grep '^1.0.0 ' "$P/new")" "1.0.0 goes to merge #4, not #3"
   done_test
 }
 
@@ -466,7 +469,7 @@ test_plan_contains_exactly_the_untagged_versions() {
   done_test
 }
 
-test_plan_skips_version_tagged_on_a_later_merge() {
+test_plan_skips_version_tagged_on_an_earlier_merge() {
   make_fixture
   skill_plan
   assert_not_contains "$(cat "$P/new")" "1.2.0" "1.2.0 is already tagged"
@@ -534,7 +537,7 @@ test_plan_latest_is_highest_semver_after_the_run() {
 test_plan_row_has_merge_date_and_pr_title_from_body() {
   make_fixture
   skill_plan
-  assert_eq "$(sha_of_merge 3 | cut -c1-7) 2026-02-03 PR 3 first release" "$(plan_row 1.0.0)" "row for 1.0.0"
+  assert_eq "$(sha_of_merge 4 | cut -c1-7) 2026-02-03 PR 4 last 1.0.0" "$(plan_row 1.0.0)" "row for 1.0.0"
   done_test
 }
 
@@ -566,7 +569,7 @@ test_execute_pushes_new_tags_to_the_planned_commits() {
   make_fixture
   skill_plan
   skill_execute
-  assert_eq "$(sha_of_merge 3)" "$(remote_tag_commit 1.0.0)" "1.0.0 on origin"
+  assert_eq "$(sha_of_merge 4)" "$(remote_tag_commit 1.0.0)" "1.0.0 on origin"
   assert_eq "$(sha_of_merge 10)" "$(remote_tag_commit 2.0.0)" "2.0.0 on origin"
   done_test
 }
@@ -575,7 +578,7 @@ test_execute_never_moves_an_existing_tag() {
   make_fixture
   skill_plan
   skill_execute
-  assert_eq "$(sha_of_merge 7)" "$(remote_tag_commit 1.2.0)" "1.2.0 stays on merge #7"
+  assert_eq "$(sha_of_merge 6)" "$(remote_tag_commit 1.2.0)" "1.2.0 stays on merge #6, not the last merge #7"
   done_test
 }
 
@@ -642,7 +645,7 @@ HOOK
   skill_execute
   assert_eq "" "$(git tag --list 2.0.0)" "local 2.0.0 deleted"
   assert_not_contains "$(cat "$GH_CREATE_LOG")" "2.0.0" "no release for 2.0.0"
-  assert_eq "$(sha_of_merge 3)" "$(remote_tag_commit 1.0.0)" "1.0.0 still pushed"
+  assert_eq "$(sha_of_merge 4)" "$(remote_tag_commit 1.0.0)" "1.0.0 still pushed"
   done_test
 }
 

@@ -61,8 +61,11 @@ Steps:
      `<sha7>: no readable version` and continue.
    - If the version is `0.0.0`: add the note `<sha7>: placeholder 0.0.0 skipped` and
      continue.
-   - Otherwise remember only the **first** `sha` for each version (the commit where it was
-     released).
+   - Otherwise remember only the **last** `sha` for each version: a later merge with the
+     same version replaces the earlier one. The tag goes on the newest merge that still
+     carries the version, so it contains every change merged before the next version bump.
+     A version that is already tagged (step 4) keeps its tag, even if later merges carry
+     the same version: the skill never moves a tag.
 6. **Plan.**
    - **New tags:** every remembered version that is not tagged (step 4), with:
      - its `sha7`;
