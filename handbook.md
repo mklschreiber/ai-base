@@ -148,10 +148,30 @@ it always goes through a manual user review first:
         - Large/breaking change (ask the user) → major (`X.0.0`), minor and patch reset
           to `0`.
      2. **Commit** the changes with a descriptive commit message that includes the issue key.
-        Before committing, apply the `.ai-base` commit guard (see "Shared AI Setup (`.ai-base`)").
+        Before committing, delete `.progress.md` (see "Progress File") and apply the
+        `.ai-base` commit guard (see "Shared AI Setup (`.ai-base`)").
      3. **Open a Pull Request** on github.com for the branch, with the issue key in the title.
      4. **Leave the issue in "In Review"** — the agent does not move it to "Done".
         The user moves it manually once the Pull Request is merged.
+
+## Progress File (`.progress.md`)
+
+Work on a ticket can be interrupted at any time (usage limit, switching to another account
+or tool). The agent therefore keeps the current state of the running ticket in the hidden
+file `.progress.md` in the project root:
+
+- **Local only:** it is never committed. If `git check-ignore -q .progress.md` fails, the
+  agent adds `.progress.md` to `.git/info/exclude`.
+- **Always current:** the agent rewrites it after every workflow step, after every agent
+  returns, before every question to the user and after every user reply or decision — before
+  it moves on. Structure and update rules: `.ai-base/skills/implement-next-ticket/SKILL.md`,
+  section "Progress file".
+- **Resume first:** at the start of every session, and before `/implement-next-ticket`
+  fetches a new ticket, check for `.progress.md`. If it exists, read it, check out its
+  branch and continue the ticket from the recorded step instead of starting anything new.
+- **Reset before the Pull Request:** when the story is closed, the agent deletes it before
+  committing, so it is neither in the commit nor in the Pull Request, and the next ticket
+  starts with a fresh file.
 
 ## Shared AI Setup (`.ai-base`)
 
@@ -209,5 +229,5 @@ The generic agents, skills and this handbook come from the ai-base git submodule
 - `/open-tickets` — lists the open issues of the project's Jira project (active sprint and
   backlog).
 - `/implement-next-ticket` — takes the topmost open issue and runs it through the whole
-  workflow above, up to the Pull Request.
+  workflow above, up to the Pull Request; resumes the ticket in `.progress.md` if there is one.
 - `/tag-releases` — adds missing version tags to the merge commits of the default branch, pushes them, and creates the GitHub releases (asks before pushing).

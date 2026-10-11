@@ -149,6 +149,14 @@ Choose the version from the previous tag (`git tag --list --sort=-v:refname | he
 Never move or recreate an existing tag. `/tag-releases` does not apply to ai-base (no
 version file and no profile).
 
+## Progress file
+
+`/implement-next-ticket` keeps the state of the running ticket in `.progress.md` in the
+project root, so that a session interrupted by a usage limit or an account switch can be
+continued by the next session (`/implement-next-ticket` resumes it). The file is local only:
+the skill adds it to `.git/info/exclude` if it is not ignored yet, and deletes it before the
+story's commit and Pull Request. Projects may also add `.progress.md` to their `.gitignore`.
+
 ## Extend or override
 
 - **Extend (default):** put the project rules for a role into the profile section
