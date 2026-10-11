@@ -1,6 +1,6 @@
 ---
 name: implement-next-ticket
-description: Pick up the topmost open issue from this project's Jira project, move it to "In Progress", implement it end-to-end using the architect, developer, and tester agents, run an independent AI review via the reviewer agent, request the user's manual review, and — once approved — bump the version, commit, and open a Pull Request. Use this when the user asks to implement the next story, pick up the next ticket, or work off the top of the backlog.
+description: Pick up the topmost open issue from this project's Jira project, move it to "In Progress", implement it end-to-end using the architect, developer, and tester agents, run an independent AI review via the reviewer agent, request the user's manual review, and — once approved — bump the version, commit, and open a Pull Request. Keeps the local progress file `.progress.md` current throughout. Use this when the user asks to implement the next story, pick up the next ticket, or work off the top of the backlog.
 ---
 
 Take the topmost open issue of this project's Jira project, move it to "In Progress", and
@@ -10,10 +10,26 @@ Tracking (Jira)". All project values (Site, Cloud ID, project key `<KEY>`, trans
 checks, versioning) come from the project profile `docs/ai-project.md`. Pass the cloud ID on
 every Atlassian call.
 
+## Progress file (`.progress.md`)
+
+Keep the current state of the ticket in the hidden, uncommitted file `.progress.md` in the
+project root, following "Progress File (`.progress.md`)" in `.ai-base/handbook.md` (ignore
+rule, structure, when to update). In short: fill it in step 2, rewrite it after every step and
+sub-step below, after every agent returns, before every question to the user and after every
+user reply or decision — before moving on — and empty it in step 9.2. A session can end at
+any time; `/resume-current-ticket` continues from this file.
+
 Steps:
 
 0. **Load context.** Read `docs/ai-project.md` (all sections) and `.ai-base/handbook.md`.
-   Check the prerequisites: the Atlassian MCP server is connected, `gh` is authenticated
+   **Progress file check (first):** if `.progress.md` exists and is not empty (anything besides
+   whitespace), a previous ticket was not finished properly. Do not fetch a ticket and do not
+   resume on your own. Show the user the ticket, branch and current step from the file and
+   ask what to do, e.g.:
+   - stop here, so that the user continues it with `/resume-current-ticket`, or
+   - discard the progress (empty the file) and continue with the next ticket.
+   Continue only after the user has decided and the file is empty. Then check the other
+   prerequisites: the Atlassian MCP server is connected, `gh` is authenticated
    (`gh auth status`), and the working tree is clean. If anything is missing, stop and name
    what is missing.
 1. **Fetch the open tickets.** Run the steps of the `open-tickets` skill.
@@ -27,7 +43,8 @@ Steps:
    type, description).
 2. **Move the ticket to "In Progress".** Call `transitionJiraIssue` (Claude Code:
    `mcp__atlassian__transitionJiraIssue`) with the issue key and the ID for In Progress from
-   profile `## Jira`.
+   profile `## Jira`. Then fill `.progress.md` (see "Progress file" above) with the issue
+   and the planned branch name, and keep it up to date from here on.
 3. **Create a git branch for the ticket**, in the format `<prefix>/<KEY>-<ticket-name>`:
    - **`<prefix>`** from the issue type: `Story` → `feature`, `Bug` → `bug`, `Task` → `task`.
      For any other type, ask the user which prefix to use instead of guessing.
@@ -97,7 +114,9 @@ Steps:
    1. Bump the version as described in profile `## Versioning`, at the level from the
       handbook's issue-type table: patch (`1.0.X`) for `Bug` and `Task`, minor (`1.X.0`) for
       `Story`. Ask the user if it is a major/breaking change (`X.0.0`).
-   2. Stage all changes with `git add -A` (never use `git commit -a`). Then apply the
+   2. Reset the progress file: `: > .progress.md` (empty it). Then stage all changes with
+      `git add -A` (never use `git commit -a`) and make sure `.progress.md` is not staged
+      (`git diff --cached --name-only -- .progress.md` prints nothing). Then apply the
       `.ai-base` commit guard from "Shared AI Setup (`.ai-base`)" in `.ai-base/handbook.md`:
       run `git diff --cached --quiet -- .ai-base`.
       - Exit code `1` and not a deliberate ai-base update: run
@@ -112,6 +131,9 @@ Steps:
       AI review outcome, with a link to the Jira issue.
    4. Leave the issue in "In Review" — do **not** move it to "Done". The user moves it
       manually once the Pull Request is merged.
+   Record each sub-step in `.progress.md` until the reset in 9.2. If the session ends after
+   the reset but before the Pull Request exists, `/resume-current-ticket` cannot see it: the
+   user then asks to push and open the Pull Request for the branch.
 10. **Summarize the result** for the user: issue key/title/URL, branch name, architecture
     concept file, changed files, test results, AI review outcome (and review file), user review
     outcome, and — if the story was closed — the new version number, the Pull Request URL, and a

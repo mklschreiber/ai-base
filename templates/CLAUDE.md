@@ -34,4 +34,5 @@ Copilot). Project rules per agent: `docs/ai-project.md` → `## Agent: <role>`.
 |-------|------------|
 | `/open-tickets` | [.claude/skills/open-tickets/SKILL.md](.claude/skills/open-tickets/SKILL.md) → [.ai-base/skills/open-tickets/SKILL.md](.ai-base/skills/open-tickets/SKILL.md) |
 | `/implement-next-ticket` | [.claude/skills/implement-next-ticket/SKILL.md](.claude/skills/implement-next-ticket/SKILL.md) → [.ai-base/skills/implement-next-ticket/SKILL.md](.ai-base/skills/implement-next-ticket/SKILL.md) |
+| `/resume-current-ticket` | [.claude/skills/resume-current-ticket/SKILL.md](.claude/skills/resume-current-ticket/SKILL.md) → [.ai-base/skills/resume-current-ticket/SKILL.md](.ai-base/skills/resume-current-ticket/SKILL.md) |
 | `/tag-releases` | [.claude/skills/tag-releases/SKILL.md](.claude/skills/tag-releases/SKILL.md) → [.ai-base/skills/tag-releases/SKILL.md](.ai-base/skills/tag-releases/SKILL.md) |
