@@ -34,4 +34,5 @@ with Claude). Project rules per agent: `docs/ai-project.md` → `## Agent: <role
 |-------|------------|
 | `open-tickets` | [.github/skills/open-tickets/SKILL.md](skills/open-tickets/SKILL.md) → [.ai-base/skills/open-tickets/SKILL.md](../.ai-base/skills/open-tickets/SKILL.md) |
 | `implement-next-ticket` | [.github/skills/implement-next-ticket/SKILL.md](skills/implement-next-ticket/SKILL.md) → [.ai-base/skills/implement-next-ticket/SKILL.md](../.ai-base/skills/implement-next-ticket/SKILL.md) |
+| `resume-current-ticket` | [.github/skills/resume-current-ticket/SKILL.md](skills/resume-current-ticket/SKILL.md) → [.ai-base/skills/resume-current-ticket/SKILL.md](../.ai-base/skills/resume-current-ticket/SKILL.md) |
 | `tag-releases` | [.github/skills/tag-releases/SKILL.md](skills/tag-releases/SKILL.md) → [.ai-base/skills/tag-releases/SKILL.md](../.ai-base/skills/tag-releases/SKILL.md) |

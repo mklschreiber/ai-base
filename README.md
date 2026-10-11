@@ -35,6 +35,7 @@ ai-base/
 ├── skills/
 │   ├── open-tickets/SKILL.md
 │   ├── implement-next-ticket/SKILL.md
+│   ├── resume-current-ticket/SKILL.md
 │   └── tag-releases/SKILL.md
 ├── scripts/
 │   └── link.sh                   creates and checks the project symlinks
@@ -152,10 +153,12 @@ version file and no profile).
 ## Progress file
 
 `/implement-next-ticket` keeps the state of the running ticket in `.progress.md` in the
-project root, so that a session interrupted by a usage limit or an account switch can be
-continued by the next session (`/implement-next-ticket` resumes it). The file is local only:
-the skill adds it to `.git/info/exclude` if it is not ignored yet, and deletes it before the
-story's commit and Pull Request. Projects may also add `.progress.md` to their `.gitignore`.
+project root and empties it before the story's commit and Pull Request. If a session is
+interrupted (usage limit, account switch), the user continues the ticket with
+`/resume-current-ticket`. `/implement-next-ticket` never resumes on its own: if the file is
+not empty, it asks the user what to do. The file is local only: the skills add it to
+`.git/info/exclude` if it is not ignored yet. Projects may also add `.progress.md` to their
+`.gitignore`. Structure and rules: handbook section "Progress File (`.progress.md`)".
 
 ## Extend or override
 
@@ -199,7 +202,8 @@ profile section must update `templates/ai-project.md` and say so in the PR descr
 
 - **Claude Code (local):** agents from `.claude/agents/`, skills from
   `.claude/skills/<name>/SKILL.md` (available as `/open-tickets`,
-  `/implement-next-ticket` and `/tag-releases`), MCP servers from `.mcp.json`.
+  `/implement-next-ticket`, `/resume-current-ticket` and `/tag-releases`), MCP servers from
+  `.mcp.json`.
 - **GitHub Copilot CLI / IDE (local):** agents from `.github/agents/<role>.agent.md`, skills
   from `.github/skills/<name>/SKILL.md`, always-loaded instructions from
   `.github/copilot-instructions.md`.

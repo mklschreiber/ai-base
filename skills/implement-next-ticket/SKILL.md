@@ -1,6 +1,6 @@
 ---
 name: implement-next-ticket
-description: Pick up the topmost open issue from this project's Jira project, move it to "In Progress", implement it end-to-end using the architect, developer, and tester agents, run an independent AI review via the reviewer agent, request the user's manual review, and — once approved — bump the version, commit, and open a Pull Request. Resumes an unfinished ticket from the local, uncommitted `.progress.md` if it exists. Use this when the user asks to implement the next story, continue the current ticket, pick up the next ticket, or work off the top of the backlog.
+description: Pick up the topmost open issue from this project's Jira project, move it to "In Progress", implement it end-to-end using the architect, developer, and tester agents, run an independent AI review via the reviewer agent, request the user's manual review, and — once approved — bump the version, commit, and open a Pull Request. Keeps the local progress file `.progress.md` current throughout. Use this when the user asks to implement the next story, pick up the next ticket, or work off the top of the backlog.
 ---
 
 Take the topmost open issue of this project's Jira project, move it to "In Progress", and
@@ -12,65 +12,26 @@ every Atlassian call.
 
 ## Progress file (`.progress.md`)
 
-A session can end at any time (usage limit, account switch). So that the next session — on
-any account — can continue without losing information, keep the current state of the ticket
-in the hidden file `.progress.md` in the project root (see "Progress File (`.progress.md`)"
-in `.ai-base/handbook.md`).
-
-- **Never commit it.** Before writing it, run `git check-ignore -q .progress.md`. If that
-  exits with a non-zero code, append the line `.progress.md` to `.git/info/exclude` (local
-  ignore, no project file changes).
-- **Create it** at the end of step 2, as soon as the ticket is known and In Progress.
-- **Update it after every step and sub-step below**, after every agent returns, before every
-  question to the user, and whenever a decision is made or a user reply arrives. Write it
-  *before* moving on, so that the file is never behind the actual state. Overwrite the whole
-  file each time (no history log needed beyond what the structure below asks for).
-- **Reset it** in step 9.2: delete it (`rm -f .progress.md`) before staging and committing,
-  so that it never ends up in the commit or the Pull Request and the next ticket starts
-  clean.
-
-Structure (keep these headings; fill in English, concise but complete enough that a fresh
-session needs nothing else to continue):
-
-```markdown
-# Progress — <KEY>-<n>: <summary>
-
-- Issue: <Site>/browse/<KEY>-<n> (type: <Story|Bug|Task>)
-- Branch: <prefix>/<KEY>-<n>-<slug>
-- Jira status: <In Progress|In Review>
-- Current step: <step number and name of this skill, e.g. "6.3 AI Review Gate — fixing findings">
-- Updated: <YYYY-MM-DD HH:MM>
-
-## User story
-<the story from step 4>
-
-## Done
-- <completed steps, with the files they created/changed, e.g. concept docs/architecture/<KEY>-42-foo.md>
-
-## Next
-- <the exact next action(s), including which agent to invoke with what input>
-
-## Open points / decisions
-- <open questions, answers from the user or the architect, review findings and their status,
-  AI review round count, user review round count>
-
-## Notes
-- <anything else a fresh session must know: failed checks and their output summary, workarounds, uncommitted state>
-```
+Keep the current state of the ticket in the hidden, uncommitted file `.progress.md` in the
+project root, following "Progress File (`.progress.md`)" in `.ai-base/handbook.md` (ignore
+rule, structure, when to update). In short: fill it in step 2, rewrite it after every step and
+sub-step below, after every agent returns, before every question to the user and after every
+user reply or decision — before moving on — and empty it in step 9.2. A session can end at
+any time; `/resume-current-ticket` continues from this file.
 
 Steps:
 
 0. **Load context.** Read `docs/ai-project.md` (all sections) and `.ai-base/handbook.md`.
-   **Resume check:** if `.progress.md` exists, read it, check out the branch named there
-   (if not already on it), and tell the user which ticket and step you are resuming. Do
-   **not** fetch a new ticket and do not require a clean working tree (it holds the
-   uncommitted work of that ticket). Check the other prerequisites (Atlassian MCP server,
-   `gh auth status`), then continue at the step named under "Current step" / "Next",
-   re-verifying the last recorded action (e.g. whether an agent's output files exist)
-   before repeating it.
-   Otherwise check the prerequisites: the Atlassian MCP server is connected, `gh` is
-   authenticated (`gh auth status`), and the working tree is clean. If anything is missing,
-   stop and name what is missing.
+   **Progress file check (first):** if `.progress.md` exists and is not empty (anything besides
+   whitespace), a previous ticket was not finished properly. Do not fetch a ticket and do not
+   resume on your own. Show the user the ticket, branch and current step from the file and
+   ask what to do, e.g.:
+   - stop here, so that the user continues it with `/resume-current-ticket`, or
+   - discard the progress (empty the file) and continue with the next ticket.
+   Continue only after the user has decided and the file is empty. Then check the other
+   prerequisites: the Atlassian MCP server is connected, `gh` is authenticated
+   (`gh auth status`), and the working tree is clean. If anything is missing, stop and name
+   what is missing.
 1. **Fetch the open tickets.** Run the steps of the `open-tickets` skill.
    - If `Uses sprints: yes`: take the topmost issue of the **active sprint** as the ticket to
      work on. If the active sprint has no open issue, show the topmost backlog issue and ask
@@ -82,7 +43,7 @@ Steps:
    type, description).
 2. **Move the ticket to "In Progress".** Call `transitionJiraIssue` (Claude Code:
    `mcp__atlassian__transitionJiraIssue`) with the issue key and the ID for In Progress from
-   profile `## Jira`. Then create `.progress.md` (see "Progress file" above) with the issue
+   profile `## Jira`. Then fill `.progress.md` (see "Progress file" above) with the issue
    and the planned branch name, and keep it up to date from here on.
 3. **Create a git branch for the ticket**, in the format `<prefix>/<KEY>-<ticket-name>`:
    - **`<prefix>`** from the issue type: `Story` → `feature`, `Bug` → `bug`, `Task` → `task`.
@@ -153,7 +114,7 @@ Steps:
    1. Bump the version as described in profile `## Versioning`, at the level from the
       handbook's issue-type table: patch (`1.0.X`) for `Bug` and `Task`, minor (`1.X.0`) for
       `Story`. Ask the user if it is a major/breaking change (`X.0.0`).
-   2. Reset the progress file: `rm -f .progress.md`. Then stage all changes with
+   2. Reset the progress file: `: > .progress.md` (empty it). Then stage all changes with
       `git add -A` (never use `git commit -a`) and make sure `.progress.md` is not staged
       (`git diff --cached --name-only -- .progress.md` prints nothing). Then apply the
       `.ai-base` commit guard from "Shared AI Setup (`.ai-base`)" in `.ai-base/handbook.md`:
@@ -170,9 +131,9 @@ Steps:
       AI review outcome, with a link to the Jira issue.
    4. Leave the issue in "In Review" — do **not** move it to "Done". The user moves it
       manually once the Pull Request is merged.
-   If the session ends after the reset but before the Pull Request exists, the next session
-   finds no `.progress.md`: check `gh pr list --head <branch>` and the branch state before
-   fetching a new ticket.
+   Record each sub-step in `.progress.md` until the reset in 9.2. If the session ends after
+   the reset but before the Pull Request exists, `/resume-current-ticket` cannot see it: the
+   user then asks to push and open the Pull Request for the branch.
 10. **Summarize the result** for the user: issue key/title/URL, branch name, architecture
     concept file, changed files, test results, AI review outcome (and review file), user review
     outcome, and — if the story was closed — the new version number, the Pull Request URL, and a
