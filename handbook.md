@@ -80,7 +80,8 @@ Docs created before the Jira migration may use other names: see profile
 
 ```
 1. User → architect:  "Here is Story <KEY>-42: As a user, I want to..."
-2. architect:         Reads docs/architecture/, creates a concept document
+2. architect:         Reads docs/architecture/ and the design copy in
+                       docs/design/<story-id>/ (if any), creates a concept document
 3. User → developer:  "Implement Story <KEY>-42 according to the concept"
 4. developer:         Reads the concept, implements — if anything is unclear → architect
 5. architect:         Answers questions, updates documentation → developer
@@ -206,6 +207,42 @@ session needs nothing else besides the Jira issue to continue):
 - <anything else a fresh session must know: failed checks and their output summary, workarounds, uncommitted state>
 ```
 
+## Designs from Claude Artifacts
+
+If an issue links a design as a Claude Artifact (`https://claude.ai/artifact/…` or
+`https://claude.ai/code/artifact/…`, in the description or a comment), the orchestrator
+copies it into the repo before any agent runs (step 4 of `/implement-next-ticket`). The
+agents cannot open artifacts; the copy is what they work with.
+
+- **Target:** `docs/design/<KEY>-<n>/` (e.g. `docs/design/<KEY>-42/`), one folder per issue,
+  with all linked designs of the issue.
+- **Reading the artifact** (Claude Code: the `Artifact` tool): a plain read of a design
+  returns only "Loading…". List its files (`scope: "files"`) and read the files under
+  `project/`.
+- **Content:** the design files as they are — the board layout (`canvas.json`), one HTML file
+  per screen (`screens/<Name>.dc.html`), and the tokens of every referenced design system
+  (`ds/<namespace>/tokens.json`, from `designSystems` in `canvas.json`). Plus a 2× PNG render
+  of every screen next to its HTML file (headless Chrome, board size from `canvas.json`).
+  Skip the design tool's runtime (`support.js`) and OS files such as `.DS_Store`.
+- **HTML vs. PNG:** the HTML files and the tokens are the source for every value (colors,
+  spacing, radii, type sizes, states, texts) — never read values off a PNG. The PNG is for the
+  overall layout, for people (the HTML does not render without the design tool's runtime) and
+  for visual comparison with the app. If no PNG can be rendered (no headless Chrome), copy
+  the design without it and note that in the README.
+- **Size:** if a single file is larger than about 1 MB or the folder larger than about 5 MB
+  (e.g. embedded photos, many screens), ask the user before committing it — to shrink it,
+  leave parts out, or use Git LFS.
+- **`README.md`** in that folder: the issue link, the artifact URL, the artifact version, the
+  copy date, the design system(s) with version, a table of the screens (title from
+  `canvas.json`, what each shows, files) and the key values (colors, spacing, radii, type
+  sizes, states, texts and their language).
+- **Source of truth:** the copy, not the artifact (which may change later). The architect
+  links `docs/design/<KEY>-<n>/README.md` in the concept; developer, tester and reviewer read
+  it. If the design changes during the ticket, refresh the copy and note the new version
+  and date in the README.
+- **Not readable:** if the artifact cannot be read (no access, tool not available), stop and
+  ask the user — e.g. to share it or to export the files — instead of working without it.
+
 ## Shared AI Setup (`.ai-base`)
 
 The generic agents, skills and this handbook come from the ai-base git submodule in
@@ -248,6 +285,8 @@ The generic agents, skills and this handbook come from the ai-base git submodule
 - **Index:** `docs/architecture/index.md` and **Log:** `docs/architecture/log.md` — use the
   sections and the log format named in profile `## Documentation`
 - **Tech Stack:** `docs/architecture/stack.md`
+- **Designs:** `docs/design/<story-id>/` — copies of Claude Artifact designs linked in the
+  issue (see "Designs from Claude Artifacts")
 
 ## Important Files
 

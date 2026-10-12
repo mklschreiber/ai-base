@@ -17,7 +17,8 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
 
 ## Workflow
 
-1. Read the architecture concept (`docs/architecture/<story-id>-*.md`).
+1. Read the architecture concept (`docs/architecture/<story-id>-*.md`) and, if it exists, the
+   design copy `docs/design/<story-id>/README.md` (states and texts to cover).
 2. Read the implemented code of all affected components.
 3. Create a **testing concept** as a comment block at the beginning of your work (what is tested, at which level, and why).
 4. Implement the tests following profile `## Agent: tester` (stack, levels, locations, naming, structure).

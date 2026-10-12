@@ -67,11 +67,18 @@ Steps:
    user story ("As a user, I want ... so that ...") if not already in that form. Include the
    issue key and URL (`<Site>/browse/<KEY>` from profile `## Jira`) for traceability. The
    issue key is the **story ID** for all docs (`docs/architecture/<KEY>-*.md`).
+
+   **Copy linked designs.** If the description or a comment links a Claude Artifact
+   (`https://claude.ai/artifact/…` or `https://claude.ai/code/artifact/…`), copy it to
+   `docs/design/<KEY>-<n>/` with a `README.md`, as described in "Designs from Claude
+   Artifacts" in `.ai-base/handbook.md`. Do this before step 5 — the agents cannot open
+   artifacts. Record the folder in `.progress.md`. If the issue links no artifact, skip this.
 5. **Run the agent workflow** as described in `.ai-base/handbook.md`, using the agent
    definitions `.ai-base/agents/architect.md`, `.ai-base/agents/developer.md`, and
    `.ai-base/agents/tester.md`, each extended by profile `## Agent: <role>`:
    1. Invoke the **architect** agent (Claude Code: Agent tool with `subagent_type: architect`)
-      with the user story and the issue key to produce/update an architecture concept under
+      with the user story, the issue key and — if it exists — the design copy
+      `docs/design/<KEY>-<n>/README.md` to produce/update an architecture concept under
       `docs/architecture/`.
    2. Invoke the **developer** agent (Claude Code: Agent tool with `subagent_type: developer`)
       with the story and a reference to the architecture concept to implement the code. If the
@@ -106,8 +113,9 @@ Steps:
      `addOrEditJiraIssueComment` (Claude Code: `mcp__atlassian__addOrEditJiraIssueComment`)
      headed `Review — Round N (<YYYY-MM-DD>)`, with the feedback verbatim followed by an
      English summary (`→ ...`) of what needs to change. Move the issue back to "In Progress"
-     (the ID for In Progress from profile `## Jira`) and restart the workflow at step 5
-     (architect → developer → tester → AI Review Gate → review).
+     (the ID for In Progress from profile `## Jira`). If the feedback refers to a changed
+     design, refresh the copy in `docs/design/<KEY>-<n>/` first (see step 4). Then restart
+     the workflow at step 5 (architect → developer → tester → AI Review Gate → review).
    - **If the user's review is positive (no findings to address):** Do not add a comment —
      successful reviews are not documented. Continue to step 9 to close the story.
 9. **Close the story** (only after both a positive AI review and a positive user review):

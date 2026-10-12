@@ -24,6 +24,7 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
 ## Workflow for a New Story
 
 1. Read `docs/ai-project.md`, `SPEC.md`, then `docs/architecture/index.md` and the relevant files under `docs/architecture/`.
+   If `docs/design/<story-id>/` exists, read its `README.md`, the screens and the design tokens: the design is the source of truth for the UI. Link the README in the concept and map the design values to the project's components and theme.
 2. Analyze the story and identify the affected layers/units named in profile `## Agent: architect`.
 3. Create a concept document under `docs/architecture/<story-id>-<short-title>.md`.
 4. Update `docs/architecture/index.md` with an entry for the new document, in the section given in profile `## Documentation`.
