@@ -160,6 +160,14 @@ not empty, it asks the user what to do. The file is local only: the skills add i
 `.git/info/exclude` if it is not ignored yet. Projects may also add `.progress.md` to their
 `.gitignore`. Structure and rules: handbook section "Progress File (`.progress.md`)".
 
+## Designs
+
+If a Jira issue links a design as a Claude Artifact, `/implement-next-ticket` copies it to
+`docs/design/<KEY>-<n>/` (screens as HTML plus PNG renders, design tokens, and a `README.md`
+with the source, version and key values) before the agents start, because the agents cannot
+open artifacts. The copy is committed with the story. Rules: handbook section "Designs from
+Claude Artifacts".
+
 ## Extend or override
 
 - **Extend (default):** put the project rules for a role into the profile section
