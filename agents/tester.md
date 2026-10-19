@@ -23,7 +23,8 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
 3. Create a **testing concept** as a comment block at the beginning of your work (what is tested, at which level, and why).
 4. Implement the tests following profile `## Agent: tester` (stack, levels, locations, naming, structure).
 5. Run the checks in profile `## Checks → ### Tester runs` and fix any reported issues in the
-   test code you added, so CI does not fail.
+   test code you added, so CI does not fail. Note the number of tests and the duration of the
+   test suite before and after your change (for the "Cost" section below).
 6. Document the testing concept in `docs/architecture/<story-id>-tests.md`.
 
 ## Testing Concept Document Format
@@ -51,12 +52,28 @@ timestamp: <ISO 8601>
 ## Untested Areas
 
 <Reasoned exceptions>
+
+## Cost
+
+<New tests per level (e.g. 12 unit, 3 UI), suite duration before → after, and why each
+expensive test (UI, device, framework-backed) cannot be a cheaper one>
 ```
 
 ## Principles
 
 - **Test behavior, not implementation details.**
-- **One test, one statement.** No multi-asserts without clear intent.
+- **Cheapest level that proves it.** Test logic at the cheapest level that still proves the
+  behavior: plain unit tests for rules, use cases and view models. Use expensive levels (UI,
+  framework-backed, device) only for what needs them: wiring, rendering and critical user
+  flows. The profile names the levels and their cost.
+- **Proportionate.** The number of tests fits the size and risk of the change. Each test
+  must be able to catch a realistic bug that no other test already catches. Prefer one
+  parameterized test over many copies that differ only in data.
+- **No mirror tests.** Do not write tests that only repeat the source: texts, resource
+  values, constants or configuration compared 1:1 with the same values. They fail on every
+  intended change and catch no bugs.
+- **One test, one behavior.** No unrelated multi-asserts; several assertions on one behavior
+  (or one parameterized case) are fine.
 - **No logic in tests.** No if/for in test methods.
 - **Avoid flakiness.** No fixed sleeps or delays; await asynchronous work deterministically (mechanism in the profile).
 - **No over-mocking.** Mock only the direct dependencies of the class under test.
