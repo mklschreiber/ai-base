@@ -38,6 +38,9 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
      regressions in adjacent code touched by the change).
    - Test coverage matches the testing concept, and the tests actually exercise the described
      cases (not just happy paths that would pass regardless of a bug).
+   - The tests are proportionate (tester principles): logic is tested at the cheapest level
+     that proves it, there are no mirror tests, and the "Cost" section of the testing concept
+     justifies the expensive tests. Unjustified growth of the test suite is a tester finding.
 4. Run the checks in profile `## Checks → ### Reviewer runs` if code was changed, and record any
    failures as findings.
 5. Document the review as a new dated round in `docs/architecture/<story-id>-review.md` (append

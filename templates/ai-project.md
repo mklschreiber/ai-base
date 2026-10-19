@@ -85,8 +85,9 @@ and the format of `docs/architecture/log.md`.>
 
 ## Agent: tester
 
-<Test stack, levels and locations, naming convention, test structure example, how to await
-asynchronous work, or "No additional rules.">
+<Test stack, levels and locations with their cost per test (which level is cheap, which is
+expensive, and what the expensive levels may be used for), naming convention, test structure
+example, how to await asynchronous work, or "No additional rules.">
 
 ## Agent: reviewer
 
