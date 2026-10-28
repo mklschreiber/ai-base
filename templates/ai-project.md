@@ -19,6 +19,7 @@ Stack details: `docs/architecture/stack.md`.>
 | Project key | `<KEY>` |
 | Board ID | `<n>` |
 | Uses sprints | `<yes \| no>` |
+| Platform label | `<label>` — optional; only when several repositories share the Jira project, else delete the row |
 
 | Status | Transition ID |
 |---|---|

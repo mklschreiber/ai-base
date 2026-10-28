@@ -187,7 +187,7 @@ Claude Artifacts".
 ```
 # <Project Name> — AI Project Profile
 ## Project
-## Jira                 (Site, Cloud ID, Project key, Board ID, Uses sprints, transition IDs)
+## Jira                 (Site, Cloud ID, Project key, Board ID, Uses sprints, optional Platform label, transition IDs)
 ## Branches & Story IDs
 ## Checks
 ### Developer runs

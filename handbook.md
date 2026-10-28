@@ -31,6 +31,17 @@ All of them are symlinks into `.ai-base/agents/`. Project rules per agent are in
 Stories are tracked in **Jira**. Site, cloud ID, project key, board and transition IDs are
 taken from the profile section `## Jira`. Pass the cloud ID on every Atlassian call.
 
+**Platform label (optional):** when several repositories share one Jira project, the profile
+sets a **Platform label** (e.g. `iOS`, `Android`) that tells their tickets apart. Then:
+
+- Every JQL query filters by it directly after the project: `project = <KEY> AND labels = <LABEL>`.
+  Tickets without the label are not shown and never picked up.
+- Before working on a ticket loaded by key, check that it carries the label; if not, ask the
+  user before going on.
+- A ticket created from the repository gets the label.
+
+Without a platform label, labels are not used.
+
 **Workflow statuses** (transition IDs for `transitionJiraIssue` from profile `## Jira`):
 
 | Status | Meaning |
@@ -54,8 +65,8 @@ names — status-name filters are unreliable.
 | `Bug` | `bug/` | patch (`1.0.X`) |
 | `Task` | `task/` | patch (`1.0.X`) |
 
-For any other issue type, ask the user which prefix to use. Labels are not used. A
-large/breaking change gets a major bump (`X.0.0`) only after asking the user.
+For any other issue type, ask the user which prefix to use. A large/breaking change gets a
+major bump (`X.0.0`) only after asking the user.
 
 **Story ID:** The Jira issue key (e.g. `<KEY>-39`) is the story ID used everywhere:
 

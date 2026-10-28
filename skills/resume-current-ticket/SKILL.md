@@ -25,7 +25,8 @@ Steps:
    Code: `mcp__atlassian__getJiraIssue`) (summary, type, description, status, comments).
    Compare it with the file: if the Jira status differs from the recorded one, or new
    `Review — Round N` comments exist that are not recorded, tell the user and take the
-   Jira state into account when choosing the step below.
+   Jira state into account when choosing the step below. If the profile sets a
+   **Platform label** and the issue does not carry it, ask the user before going on.
 4. **Restore the branch.** If the current branch is not the one named in `.progress.md`,
    check it out (with uncommitted changes on another branch, stop and ask the user). Then
    sync the shared AI setup as in step 3 of `/implement-next-ticket`
