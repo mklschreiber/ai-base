@@ -37,7 +37,7 @@ Steps:
      work on. If the active sprint has no open issue, show the topmost backlog issue and ask
      the user whether to take it.
    - If `Uses sprints: no`: take the topmost open issue without asking.
-   - If nothing is open at all, report: "No open tickets in the <KEY> project." and stop.
+   - If nothing is open at all, report the message of `open-tickets` and stop.
 
    Load the issue with `getJiraIssue` (Claude Code: `mcp__atlassian__getJiraIssue`) (summary,
    type, description).
