@@ -32,7 +32,7 @@ Stories are tracked in **Jira**. Site, cloud ID, project key, board and transiti
 taken from the profile section `## Jira`. Pass the cloud ID on every Atlassian call.
 
 **Platform label (optional):** when several repositories share one Jira project, the profile
-sets a **Platform label** (e.g. `iOS`, `Android`) that tells their tickets apart. Then:
+sets a **Platform label** (e.g. `Apple`, `Android`, `Web`) that tells their tickets apart. Then:
 
 - Every JQL query filters by it directly after the project: `project = <KEY> AND labels = <LABEL>`.
   Tickets without the label are not shown and never picked up.
