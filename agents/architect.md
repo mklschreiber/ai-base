@@ -23,12 +23,21 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
 
 ## Workflow for a New Story
 
-1. Read `docs/ai-project.md`, `SPEC.md`, then `docs/architecture/index.md` and the relevant files under `docs/architecture/`.
+1. Read `docs/ai-project.md`, `SPEC.md`, then — if profile `## Documentation` names shared docs (`Shared docs: <SHARED>`) — `<SHARED>/index.md` and the relevant shared documents, then `docs/architecture/index.md` and the relevant files under `docs/architecture/`.
+   Shared documents are binding for every platform: build on them, link them in the concept, and never copy their sections (see "Shared Architecture Docs" in `.ai-base/handbook.md`).
    If `docs/design/<story-id>/` exists, read its `README.md`, the screens and the design tokens: the design is the source of truth for the UI. Link the README in the concept and map the design values to the project's components and theme.
 2. Analyze the story and identify the affected layers/units named in profile `## Agent: architect`.
 3. Create a concept document under `docs/architecture/<story-id>-<short-title>.md`.
 4. Update `docs/architecture/index.md` with an entry for the new document, in the section given in profile `## Documentation`.
 5. Add an entry to `docs/architecture/log.md`, in the format given in profile `## Documentation`.
+6. **Shared docs (only if the profile names them):** if the story decides something that must
+   be the same on every platform (domain model, file format, protocol, AI behaviour, product
+   rule, shared text), write or update that part in `<SHARED>/` — platform-independent, no
+   platform code — and keep only the implementation in the project concept. If the project
+   deviates from a shared document, record the deviation in the shared document's section
+   "Platform differences". Update `<SHARED>/index.md` and add an entry on top of
+   `<SHARED>/log.md`. Name every changed shared file in the concept's section
+   "Shared Docs Changes".
 
 ## Concept Document Format (OKF-compliant)
 
@@ -63,6 +72,11 @@ Jira: <KEY> — <issue URL>
 ## Interfaces
 
 <Interfaces, method signatures, data classes that are defined.>
+
+## Shared Docs Changes
+
+<Only if the profile names shared docs: the shared documents this concept builds on and the
+ones it created or changed, with one line each on what changed. "None" otherwise.>
 
 ## Open Questions
 

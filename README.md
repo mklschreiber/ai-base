@@ -125,6 +125,21 @@ Projects pin only ai-base release tags and stay on them until someone runs the u
 and commits the new pointer. An ai-base change can therefore never break a project silently.
 `.gitmodules` has no `branch =` entry, and `git submodule update --remote` is not used.
 
+## Shared architecture docs (optional)
+
+Several repositories of one product (e.g. one per platform) can share their
+platform-independent architecture in a separate repository of OKF documents, included as a
+second submodule that tracks `main` (unlike `.ai-base`):
+
+```sh
+git submodule add -b main ../<Product>-Architecture.git docs/shared
+```
+
+Then add `- Shared docs: \`docs/shared\`` to profile `## Documentation`. The architect reads
+and updates the shared documents, and `/implement-next-ticket` syncs them at the start of a
+ticket and pushes their changes as a Pull Request of their own on a branch with the story's
+name. Rules: handbook section "Shared Architecture Docs".
+
 ## Releasing ai-base
 
 ai-base is versioned with plain semver tags `X.Y.Z` (no `v` prefix), and each tag has a

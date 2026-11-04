@@ -28,12 +28,19 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
 
 1. Read the architecture concept (`docs/architecture/<story-id>-*.md`, excluding `-tests.md` and
    `-review.md`), the testing concept (`docs/architecture/<story-id>-tests.md`) and, if it
-   exists, the design copy `docs/design/<story-id>/` (`README.md`, screens, tokens).
+   exists, the design copy `docs/design/<story-id>/` (`README.md`, screens, tokens). If profile
+   `## Documentation` names shared docs (`Shared docs: <SHARED>`), also read the shared
+   documents the concept links and the story's changes to them (`git -C <SHARED> diff` and
+   `git -C <SHARED> status`).
 2. Inspect the actual code changes for the story, e.g. via `git diff <base-branch>...HEAD` and
    `git status`.
 3. Verify:
    - The implementation matches the architecture concept's decisions and interfaces, and —
      if a design copy exists — the screens, states and values of the design.
+   - With shared docs: the concept and the code follow the linked shared documents (or the
+     deviation is recorded in their section "Platform differences"), the concept links
+     instead of copying shared sections, and changed shared documents stay
+     platform-independent and are listed in the concept's "Shared Docs Changes".
    - No correctness bugs (logic errors, unhandled edge cases, incorrect state handling,
      regressions in adjacent code touched by the change).
    - Test coverage matches the testing concept, and the tests actually exercise the described

@@ -25,6 +25,8 @@ precedence** on conflict. The shared workflow is described in `.ai-base/handbook
 
 1. Read the architecture concept for the story (`docs/architecture/<story-id>-*.md`) and,
    if it exists, the design copy `docs/design/<story-id>/` (`README.md`, screens, tokens).
+   Also read the shared documents the concept links (profile `## Documentation` →
+   `Shared docs:`); they are binding like the concept.
 2. Read all affected existing files before changing them.
 3. Implement layer by layer according to the data flow in the concept.
 4. Adhere to the defined interfaces and data classes.

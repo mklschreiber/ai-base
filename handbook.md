@@ -161,7 +161,9 @@ it always goes through a manual user review first:
           to `0`.
      2. **Commit** the changes with a descriptive commit message that includes the issue key.
         Before committing, empty `.progress.md` (see "Progress File") and apply the
-        `.ai-base` commit guard (see "Shared AI Setup (`.ai-base`)").
+        `.ai-base` commit guard (see "Shared AI Setup (`.ai-base`)"). If the profile names
+        shared docs, first push and open the Pull Request for their changes (see "Shared
+        Architecture Docs").
      3. **Open a Pull Request** on github.com for the branch, with the issue key in the title.
      4. **Leave the issue in "In Review"** — the agent does not move it to "Done".
         The user moves it manually once the Pull Request is merged.
@@ -286,6 +288,45 @@ The generic agents, skills and this handbook come from the ai-base git submodule
    Read the ai-base release notes for the versions in between. A major version may need
    profile or file changes, which belong to the same ticket.
 
+## Shared Architecture Docs (optional)
+
+When several repositories build the same product (e.g. one per platform), the
+platform-independent architecture (domain model, file formats, protocols, AI behaviour,
+product rules, shared texts) lives in one separate repository of OKF documents. Each
+project includes it as a git submodule and names its path in profile `## Documentation`
+(`Shared docs: <path>`, `<SHARED>` below). Without that line, this section does not apply.
+
+- **What goes where:** behaviour, data, formats and texts that must be the same on every
+  platform go into `<SHARED>/`; how this project implements them stays in
+  `docs/architecture/`. A project concept **links** the shared documents it builds on
+  and never copies their sections. Deviations are allowed only after the shared document
+  records them in its section "Platform differences".
+- **Tracking:** unlike `.ai-base`, the shared docs follow the `main` branch of their
+  repository (`.gitmodules`: `branch = main`), because every story must build on the
+  latest decisions of all platforms.
+- **Sync at the start of a ticket** (after creating or checking out its branch):
+  `git submodule update --init --remote <SHARED>`. Skip it if
+  `git -C <SHARED> status --porcelain` prints anything (unfinished shared changes of the
+  running ticket). On any other branch switch or pull, use
+  `git submodule update --init <SHARED>` (no `--remote`), so the recorded commit is kept.
+- **Changing a shared document:** the architect edits the files in `<SHARED>/` directly,
+  updates `<SHARED>/index.md` and adds an entry on top of `<SHARED>/log.md` in the format
+  given there. The changes travel with the story: at the commit step (see
+  "Story Review & Release"), if `git -C <SHARED> status --porcelain` prints anything:
+  1. `git -C <SHARED> switch -c <story branch>` (or `git -C <SHARED> switch <story branch>`
+     if it exists), `git -C <SHARED> add -A`, commit with the issue key in the message.
+  2. `git -C <SHARED> push -u origin <story branch>`, then open a Pull Request in the
+     shared repository (run `gh pr create` inside `<SHARED>/`) with the issue key in the
+     title and a link to the Jira issue.
+  3. Commit the project as usual: the moved `<SHARED>` pointer is part of the story's
+     commit. Name the shared Pull Request in the project's Pull Request, and add the
+     project's Pull Request URL to the shared one (`gh pr edit` inside `<SHARED>/`).
+  The shared Pull Request is merged with "Create a merge commit", so the recorded commit
+  stays reachable from `main`.
+- **Commit guard:** a changed `<SHARED>` pointer may be committed in every story. Before
+  committing, `git -C <SHARED> branch -r --contains HEAD` must print at least one branch
+  (the recorded commit is pushed); otherwise push it first as above.
+
 ## Documentation
 
 - **Architecture Concepts:** `docs/architecture/` (OKF format according to `SPEC.md`)
@@ -296,6 +337,8 @@ The generic agents, skills and this handbook come from the ai-base git submodule
 - **Index:** `docs/architecture/index.md` and **Log:** `docs/architecture/log.md` — use the
   sections and the log format named in profile `## Documentation`
 - **Tech Stack:** `docs/architecture/stack.md`
+- **Shared Architecture Docs (optional):** the path named in profile `## Documentation`
+  (`Shared docs:`), see "Shared Architecture Docs"
 - **Designs:** `docs/design/<story-id>/` — copies of Claude Artifact designs linked in the
   issue (see "Designs from Claude Artifacts")
 
