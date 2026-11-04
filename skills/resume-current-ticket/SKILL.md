@@ -30,7 +30,10 @@ Steps:
 4. **Restore the branch.** If the current branch is not the one named in `.progress.md`,
    check it out (with uncommitted changes on another branch, stop and ask the user). Then
    sync the shared AI setup as in step 3 of `/implement-next-ticket`
-   (`git submodule update --init .ai-base`, `.ai-base/scripts/link.sh --check`).
+   (`git submodule update --init .ai-base`, `.ai-base/scripts/link.sh --check`). If the
+   profile names `Shared docs: <SHARED>`, leave `<SHARED>` as it is when
+   `git -C <SHARED> status --porcelain` prints anything (unfinished shared changes of this
+   ticket); otherwise run `git submodule update --init <SHARED>` (no `--remote`).
 5. **Verify the recorded state.** Check the files listed under "Done" and the git state
    (`git status`, `git log <default branch>..HEAD`) against the file. The last recorded
    action may have been cut off: if its result is missing or incomplete (e.g. an agent's

@@ -71,6 +71,10 @@ Read command (file content on stdin, prints one `X.Y.Z` line or nothing):
 <Hint: the sections of `docs/architecture/index.md` to use for concepts, tests and reviews,
 and the format of `docs/architecture/log.md`.>
 
+- Shared docs: `<path>` — optional; only when several repositories share architecture
+  documentation in a git submodule (e.g. `docs/shared`), else delete the line. See
+  "Shared Architecture Docs" in `.ai-base/handbook.md`.
+
 ## Important Files
 
 <Hint: project files agents should know about, one bullet each.>

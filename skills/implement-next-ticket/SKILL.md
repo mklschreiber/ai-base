@@ -63,6 +63,11 @@ Steps:
      (`.ai-base/skills/implement-next-ticket/SKILL.md`) before continuing. Then run
      `.ai-base/scripts/link.sh --check`. If it fails, stop and tell the user (see
      "Shared AI Setup (`.ai-base`)" in `.ai-base/handbook.md`).
+   - **Sync the shared docs** (only if profile `## Documentation` names
+     `Shared docs: <SHARED>`): if `git -C <SHARED> status --porcelain` prints nothing, run
+     `git submodule update --init --remote <SHARED>`, so the story builds on the latest
+     shared decisions of all platforms (see "Shared Architecture Docs" in
+     `.ai-base/handbook.md`).
 4. **Derive the user story.** Take the issue's summary and description and phrase them as a
    user story ("As a user, I want ... so that ...") if not already in that form. Include the
    issue key and URL (`<Site>/browse/<KEY>` from profile `## Jira`) for traceability. The
@@ -122,7 +127,14 @@ Steps:
    1. Bump the version as described in profile `## Versioning`, at the level from the
       handbook's issue-type table: patch (`1.0.X`) for `Bug` and `Task`, minor (`1.X.0`) for
       `Story`. Ask the user if it is a major/breaking change (`X.0.0`).
-   2. Reset the progress file: `: > .progress.md` (empty it). Then stage all changes with
+   2. **Shared docs first** (only if the profile names `Shared docs: <SHARED>` and
+      `git -C <SHARED> status --porcelain` prints anything): commit them on a branch with
+      the story's branch name, push it and open the Pull Request in the shared repository,
+      as in "Shared Architecture Docs" in `.ai-base/handbook.md`. Record the shared Pull
+      Request URL in `.progress.md`. Then check that
+      `git -C <SHARED> branch -r --contains HEAD` prints a branch.
+
+      Reset the progress file: `: > .progress.md` (empty it). Then stage all changes with
       `git add -A` (never use `git commit -a`) and make sure `.progress.md` is not staged
       (`git diff --cached --name-only -- .progress.md` prints nothing). Then apply the
       `.ai-base` commit guard from "Shared AI Setup (`.ai-base`)" in `.ai-base/handbook.md`:
@@ -136,7 +148,9 @@ Steps:
       Then commit with a descriptive commit message that includes the issue key.
    3. Push the branch and open a Pull Request on github.com (issue key in the title)
       summarizing the story, the architecture concept, the implementation, the tests, and the
-      AI review outcome, with a link to the Jira issue.
+      AI review outcome, with a link to the Jira issue. If step 9.2 opened a shared Pull
+      Request, name it in the description and add this Pull Request's URL to it
+      (`gh pr edit` inside `<SHARED>/`).
    4. Leave the issue in "In Review" — do **not** move it to "Done". The user moves it
       manually once the Pull Request is merged.
    Record each sub-step in `.progress.md` until the reset in 9.2. If the session ends after
